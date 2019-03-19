@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Helpers\InfusionsoftHelper;
 use Illuminate\Http\Request;
 use Response;
+use App\ModuleReminderTags;
 
 class ApiController extends Controller
 {
@@ -34,4 +35,14 @@ class ApiController extends Controller
 
         return $user;
     }
+
+    // public function getCourseTags(){
+    //     $infusionsoft = new InfusionsoftHelper();
+    //     $reminderTags = $infusionsoft->getAllTags();
+    //     foreach ($reminderTags->toArray() as $tag) {
+    //         (new ModuleReminderTags())->createNew($tag);
+    //     }
+    // }
+
+
 }

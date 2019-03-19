@@ -30,8 +30,12 @@ class InfusionsoftController extends Controller
     public function testInfusionsoftIntegrationGetAllTags(){
 
         $infusionsoft = new InfusionsoftHelper();
-
-        return Response::json($infusionsoft->getAllTags());
+        $reminderTags = $infusionsoft->getAllTags();
+        //Stores all the tags in a table
+        foreach ($reminderTags->toArray() as $tag) {
+            (new ModuleReminderTags())->createNew($tag);
+        }
+        return 'Success';
     }
 
     public function testInfusionsoftIntegrationCreateContact(){
