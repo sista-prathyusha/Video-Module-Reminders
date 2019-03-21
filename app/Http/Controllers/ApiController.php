@@ -54,44 +54,76 @@ class ApiController extends Controller
         $user = $this->exampleCustomer();
         return $user;
     }
+    /**
+     * [setModuleReminder description]
+     * @param Request $request [description]
+     */
     public function setModuleReminder(Request $request){
         $email = $request->email;
         $user = User::where('email', $email)->first();
         //$infusionsoft = new InfusionsoftHelper();
         //Test products
-        $test = "ipa,iea";
+        $test = "ipa,iea,iaa";
         $status = null;
         $message = null;
-        $toDo = null;
-        $filtered = array();
+        $reminderTag = null;
         $modules = collect([]);
         //$infusionsoft->getContact($email);
         
         //Extracting completed modules for the user
-        $products = preg_split('/[\s,]+/', $contact);
-        $completed = $user->completed_modules()->orderBy('pivot_updated_at', 'desc')->get();
+        $products = preg_split('/[\s,]+/', $test);
+        
+        $nextModuleOfInterest = null;
         foreach($products as $product){
-            $modules = collect(Module::where('course_key', $product)->get())->pluck('id');
-            if($completed->isEmpty()){
-                $toDo = $modules->first();
-                return $toDo;
-            }
-            $uncompleted = $modules->diff($completed->pluck('id'));
-            if(count($uncompleted) > 0){
-                $lastCompleted = $completed->first();
-
-                //Extract the next module ID
-                do{
-                   $toDo = $lastCompleted->getNextModuleId(); 
-                   return $toDo;
-                }while(!$completed->has($toDo));  
-            }else{
-                $toDo = -1;
-                return "To do: ".$toDo;
-            }
+            //TO DO
+            $nextModuleOfInterest = $this->getNextModuleOfInterest($user, $product);
+            if($nextModuleOfInterest)
+                break;
         }
 
-        return "To do: ".$toDo;
+        dd($nextModuleOfInterest);
+    }
+
+    /**
+     * Extracts next module of interest to trigger email sequence on, for a given product based on what user has already completed
+     * @return Module Next module that we want the user to view
+     */
+    private function getNextModuleOfInterest($user, $product){
+
+        $nextModuleOfInterest = null;
+        
+        //Get completed modules for the product
+        $completed = $user->completed_modules()->where('course_key', $product)->orderBy('pivot_updated_at', 'desc')->get();
+            
+        //Get all modules for that product
+        $modules = Module::where('course_key', $product)
+                            ->orderBy('display_order')
+                            ->get();
+        
+        //If there are no completed modules, then return the first module of the first product
+        if($completed->isEmpty()){
+            $nextModuleOfInterest = $modules->first();
+            return $nextModuleOfInterest;
+        }
+
+        //Compute uncompleted modules for the product
+        $uncompleted = $modules->diff($completed);
+
+        //If there are any uncompleted modules, we find the last completed module and compute the next module that is not completed
+        if(count($uncompleted) >= 0){
+            $lastCompleted = $completed->first();
+            
+            do{
+                $lastCompleted = $lastCompleted->getNextModule();
+            }while($lastCompleted && $completed->contains($lastCompleted));
+            
+            if($lastCompleted){ 
+                $nextModuleOfInterest = $lastCompleted; 
+                return $nextModuleOfInterest;
+            }                   
+        }
+
+        return null;
     }
 
 }
