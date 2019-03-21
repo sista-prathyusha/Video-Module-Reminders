@@ -61,27 +61,43 @@ class ApiController extends Controller
     public function setModuleReminder(Request $request){
         $email = $request->email;
         $user = User::where('email', $email)->first();
-        //$infusionsoft = new InfusionsoftHelper();
+        $infusionsoft = new InfusionsoftHelper();
         //Test products
-        $test = "ipa,iea,iaa";
+        $contact = $infusionsoft->getContact($email);
+        $result = null;
         $status = null;
         $message = null;
         $reminderTag = null;
         $modules = collect([]);
-        //$infusionsoft->getContact($email);
+        
         
         //Extracting completed modules for the user
-        $products = preg_split('/[\s,]+/', $test);
+        $products = preg_split('/[\s,]+/', $contact['_Products']);
         
         $nextModuleOfInterest = null;
         foreach($products as $product){
-            //TO DO
+            //Get next uncompleted module
             $nextModuleOfInterest = $this->getNextModuleOfInterest($user, $product);
             if($nextModuleOfInterest)
                 break;
         }
 
-        dd($nextModuleOfInterest);
+        $moduleReminderTag = ModuleReminderTags::forModule($nextModuleOfInterest)->first();
+        //If module reminder tag is not null, function will return succes and the corresponding tag
+        if($moduleReminderTag){
+            $contactId = $contact['Id'];
+            //Checks if getContact returns the corresponding contact Id
+            if($contactId){
+                $infusionsoft->addTag($contactId, $moduleReminderTag->tag_id);
+                $result = ['success' => true, 'message' => $moduleReminderTag->tag_name];
+            }else{
+                $result = ['success' => false, 'message' => 'Contact email not found'];
+            }
+            
+        }else{ //Returns false if no tag is found
+            $result = ['success' => false, 'message' => 'Reminder tag not found'];
+        } 
+        return Response::json($result);    
     }
 
     /**
@@ -123,7 +139,7 @@ class ApiController extends Controller
             }                   
         }
 
-        return null;
+        return $nextModuleOfInterest;
     }
 
 }

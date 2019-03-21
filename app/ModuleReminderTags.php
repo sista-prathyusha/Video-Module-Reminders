@@ -23,4 +23,20 @@ class ModuleReminderTags extends Model
    	    $this->tag_description = $tag->description;
         $this->save();
  	}
+
+ 	/**
+ 	 * Query returns the corresponding tag name
+ 	 * @param  [type]      $query  [description]
+ 	 * @param  Module|null $module [description]
+ 	 * @return [type]              [description]
+ 	 */
+ 	public function scopeForModule($query, Module $module=null){
+ 		if($module){
+ 			$query->where('tag_name', 'like', '%'.$module->name.'%');
+ 		}else{
+ 			$query->where('tag_name', 'Module reminders completed');
+ 		}
+
+ 		return $query;
+ 	}
 }

@@ -6,6 +6,7 @@ use App\Http\Helpers\InfusionsoftHelper;
 use Request;
 use Storage;
 use Response;
+use App\ModuleReminderTags;
 
 class InfusionsoftController extends Controller
 {
