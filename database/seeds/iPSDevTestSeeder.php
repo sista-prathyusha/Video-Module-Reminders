@@ -12,7 +12,8 @@ class iPSDevTestSeeder extends Seeder
      */
     public function run()
     {
-
+        Schema::disableForeignKeyConstraints();
+        DB::table('Modules')->truncate();
         for ($i = 1; $i <= 7; $i++){
             Module::insert([
                 [
@@ -31,6 +32,7 @@ class iPSDevTestSeeder extends Seeder
                 ]
             ]);
         }
+        Schema::enableForeignKeyConstraints();
 
 
     }

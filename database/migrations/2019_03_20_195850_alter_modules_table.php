@@ -14,7 +14,7 @@ class AlterModulesTable extends Migration
     public function up()
     {
         Schema::table('modules', function (Blueprint $table) {
-            $table->integer('display_order')->after('name');
+            $table->integer('display_order')->after('name')->nullable();
         });
     }
 

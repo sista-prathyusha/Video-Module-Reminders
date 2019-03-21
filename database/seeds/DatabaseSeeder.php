@@ -13,5 +13,6 @@ class DatabaseSeeder extends Seeder
     {
         $this->call(iPSDevTestSeeder::class);
         $this->call(AddDisplayOrderToModules::class);
+        $this->call(InfusionsoftTagsSeeder::class);
     }
 }
