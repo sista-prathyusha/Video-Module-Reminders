@@ -35,7 +35,7 @@ class ApiController extends Controller
         // attach IPA M1-3 & M5
         $user->completed_modules()->attach(Module::where('course_key', 'ipa')->limit(3)->get());
         $user->completed_modules()->attach(Module::where('name', 'IPA Module 5')->first());
-        //Prats added
+        //My changes
         $user->completed_modules()->attach(Module::where('name', 'IEA Module 4')->first());
         $user->completed_modules()->attach(Module::where('name', 'IEA Module 6')->first());
 
@@ -43,20 +43,14 @@ class ApiController extends Controller
         return $user;
     }
 
-    // public function getCourseTags(){
-    //     $infusionsoft = new InfusionsoftHelper();
-    //     $reminderTags = $infusionsoft->getAllTags();
-    //     foreach ($reminderTags->toArray() as $tag) {
-    //         (new ModuleReminderTags())->createNew($tag);
-    //     }
-    // }
     public function createUser(){
         $user = $this->exampleCustomer();
         return $user;
     }
     /**
-     * [setModuleReminder description]
-     * @param Request $request [description]
+     * Adds an appropriate reminder tag to infusionsoft API
+     * @param Request $request 
+     * return Json response with status and message
      */
     public function setModuleReminder(Request $request){
         $email = $request->email;
@@ -102,7 +96,7 @@ class ApiController extends Controller
 
     /**
      * Extracts next module of interest to trigger email sequence on, for a given product based on what user has already completed
-     * @return Module Next module that we want the user to view
+     * @return Module - Next module that we want the user to view
      */
     private function getNextModuleOfInterest($user, $product){
 
