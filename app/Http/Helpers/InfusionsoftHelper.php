@@ -6,14 +6,18 @@ use Infusionsoft;
 use Log;
 use Storage;
 use Request;
+use App\Service;
+use Mockery;
 
 
 class InfusionsoftHelper
 {
+
     private $infusionsoft;
 
     public function __construct()
     {
+
         if (Storage::exists('inf_token')) {
 
             Infusionsoft::setToken(unserialize(Storage::get("inf_token")));

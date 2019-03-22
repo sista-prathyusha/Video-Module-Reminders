@@ -35,11 +35,6 @@ class ApiController extends Controller
         // attach IPA M1-3 & M5
         $user->completed_modules()->attach(Module::where('course_key', 'ipa')->limit(3)->get());
         $user->completed_modules()->attach(Module::where('name', 'IPA Module 5')->first());
-        //My changes
-        $user->completed_modules()->attach(Module::where('name', 'IEA Module 4')->first());
-        $user->completed_modules()->attach(Module::where('name', 'IEA Module 6')->first());
-
-
         return $user;
     }
 
@@ -135,5 +130,6 @@ class ApiController extends Controller
 
         return $nextModuleOfInterest;
     }
+
 
 }

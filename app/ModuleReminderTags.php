@@ -28,7 +28,7 @@ class ModuleReminderTags extends Model
  	 * Query returns the corresponding tag name
  	 * @param  [type]      $query  [description]
  	 * @param  Module|null $module [description]
- 	 * @return [type]              [description]
+ 	 * @return [query]              [description]
  	 */
  	public function scopeForModule($query, Module $module=null){
  		if($module){

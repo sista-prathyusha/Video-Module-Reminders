@@ -6,34 +6,59 @@ use Tests\TestCase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Http\Helpers\InfusionsoftHelper;
+use App\Http\Controllers\ApiController;
+use Illuminate\Http\Request;
 use App\Module;
 use App\ModuleReminderTags;
 use App\User;
 use Carbon;
 use DB;
+use Mockery;
+use App\Service;
 
 class HTTPTest extends TestCase
 {
-	// use RefreshDatabase;
 
 	protected $newUser = null;
-    /**
-     * A basic test example.
-     *
-     * @return void
-     */
-    // public function testExample()
-    // {
-    //    $this->assertTrue(true);
-    // }
-
+    
     private function createUser($products){
-    	$infusionsoft = new InfusionsoftHelper();
 
-        $uniqid = uniqid();
 
-        $infusionsoft->createContact([
+    	$uniqid = uniqid();
+    	$email = $uniqid."@test.com";
+
+    	/**
+    	 
+    	//Mocking related code. Yet to be tested.
+
+		$contactId = 23231;
+
+    	$this->instance(Service::class, Mockery::mock(Service::class, function ($mock) {
+		    $mock->shouldReceive('process')->once();
+		}));
+
+    	$infusionsoftMock = Mockery::mock('InfusionsoftHelper');
+
+    	$infusionsoftMock->shouldReceive('createContact')->with([
             'Email' => $uniqid.'@test.com',
+            "_Products" => $products
+        ])->once()->andReturn($contactId);
+
+    	$infusionsoftMock->shouldReceive('getContact')->with($email)->once()->andReturn([	
+			"Email"=>	$email,
+			"Groups"=>	"110,116,126",
+			"_Products"=>	$products,
+			"Id"=>$contactId
+			]);
+
+		$infusionsoftMock->shouldReceive('addTag')->with([$contactId,''])->once();
+    	
+    	 */
+
+		$infusionsoft = new InfusionsoftHelper();
+
+		$infusionsoft->createContact([
+            'Email' => $email,
             "_Products" => $products
         ]);
 
@@ -42,7 +67,9 @@ class HTTPTest extends TestCase
             'email' => $uniqid.'@test.com',
             'password' => bcrypt($uniqid)
         ]);
+
         return $user;
+
     }
 
     /**
@@ -50,6 +77,7 @@ class HTTPTest extends TestCase
      * @return Json with success and the corresponding reminder tag
      */
     public function testAllModulesCompleted(){
+
     	$products = "ipa,iea";
     	$newUser = $this->createUser($products);
         //Attach all modules to user 
@@ -59,10 +87,10 @@ class HTTPTest extends TestCase
         $response->assertJson(['success'=>true, 'message'=>'Module reminders completed']);
     }
 
-    /**
-     * Test to check if first module of first tag is returned if no modules are completed
-     * @return Json with success and the corresponding reminder tag
-     */
+    // /**
+    //  * Test to check if first module of first tag is returned if no modules are completed
+    //  * @return Json with success and the corresponding reminder tag
+    //  */
     public function testNoModulesCompleted(){
     	$products = "iea,iaa";
     	$newUser = $this->createUser($products);
@@ -119,8 +147,11 @@ class HTTPTest extends TestCase
         $newUser->completed_modules()->attach(Module::where('name', 'IEA Module 7')->first());
         $newUser->completed_modules()->attach(Module::where('course_key', 'ipa')->limit(2)->get());
         $newUser->completed_modules()->attach(Module::where('name', 'IPA Module 7')->first());
+        $setUpdateTime = $newUser->completed_modules()->where('name', 'IEA Module 7')->first();		
+        $setUpdateTime->pivot->updated_at = Carbon\Carbon::now()->addSeconds(50);
+        $setUpdateTime->pivot->save();
         $setUpdateTime = $newUser->completed_modules()->where('name', 'IPA Module 7')->first();		
-        $setUpdateTime->pivot->updated_at = Carbon\Carbon::now()->addSeconds(60);
+        $setUpdateTime->pivot->updated_at = Carbon\Carbon::now()->addSeconds(90);
         $setUpdateTime->pivot->save();
         $response = $this->json('POST', '/api/module_reminder_assigner', ['email' => $newUser->email]);
         $response->assertStatus(200);
@@ -129,6 +160,7 @@ class HTTPTest extends TestCase
 
     protected function tearDown()
     {
-        DB::statement('truncate table user_completed_modules');
+    	// Mockery::close();
+        //DB::statement('truncate table user_completed_modules');
     }
 }

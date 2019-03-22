@@ -13,7 +13,6 @@ use Illuminate\Http\Request;
 |
 */
 
-//Route::get('getAllTags', 'ApiController@getCourseTags');
 Route::post('module_reminder_assigner','ApiController@setModuleReminder');
 Route::get('create_user','ApiController@createUser');
 
