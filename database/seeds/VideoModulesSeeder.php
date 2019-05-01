@@ -3,7 +3,7 @@
 use Illuminate\Database\Seeder;
 use App\Module;
 
-class iPSDevTestSeeder extends Seeder
+class VideoModulesSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -17,23 +17,21 @@ class iPSDevTestSeeder extends Seeder
         for ($i = 1; $i <= 7; $i++){
             Module::insert([
                 [
-                    'course_key' => 'ipa',
-                    'name' => 'IPA Module ' . $i
+                    'course_key' => 'html',
+                    'name' => 'HTML Module ' . $i
                 ],
 
                 [
-                    'course_key' => 'iea',
-                    'name' => 'IEA Module ' . $i
+                    'course_key' => 'css',
+                    'name' => 'CSS Module ' . $i
                 ],
 
                 [
-                    'course_key' => 'iaa',
-                    'name' => 'IAA Module ' . $i
+                    'course_key' => 'js',
+                    'name' => 'Javascript Module ' . $i
                 ]
             ]);
         }
         Schema::enableForeignKeyConstraints();
-
-
     }
 }

@@ -11,8 +11,8 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        $this->call(iPSDevTestSeeder::class);
+        $this->call(VideoModulesSeeder::class);
         $this->call(AddDisplayOrderToModules::class);
-        $this->call(InfusionsoftTagsSeeder::class);
+        $this->call(ReminderTagSeeder::class);
     }
 }

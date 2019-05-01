@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Http\Helpers\InfusionsoftHelper;
 use Illuminate\Http\Request;
-//use Illuminate\Support\Facades\Request;
 use Response;
 use App\ModuleReminderTags;
 use App\User;
@@ -17,30 +16,21 @@ class ApiController extends Controller
 
     private function exampleCustomer(){
 
-        $infusionsoft = new InfusionsoftHelper();
-
         $uniqid = uniqid();
-
-        $infusionsoft->createContact([
-            'Email' => $uniqid.'@test.com',
-            "_Products" => 'ipa,iea'
-        ]);
-
         $user = User::create([
             'name' => 'Test ' . $uniqid,
             'email' => $uniqid.'@test.com',
             'password' => bcrypt($uniqid)
         ]);
-
-        // attach IPA M1-3 & M5
-        $user->completed_modules()->attach(Module::where('course_key', 'ipa')->limit(3)->get());
-        $user->completed_modules()->attach(Module::where('name', 'IPA Module 5')->first());
-        return $user;
+        $result = [
+            'user' => $user,
+            'contactId' => $uniqid
+        ];
+        return $result;
     }
 
     public function createUser(){
-        $user = $this->exampleCustomer();
-        return $user;
+        return $this->exampleCustomer();
     }
     /**
      * Adds an appropriate reminder tag to infusionsoft API
@@ -49,19 +39,16 @@ class ApiController extends Controller
      */
     public function setModuleReminder(Request $request){
         $email = $request->email;
-        $user = User::where('email', $email)->first();
-        $infusionsoft = new InfusionsoftHelper();
-        //Test products
-        $contact = $infusionsoft->getContact($email);
+        $contactId = $request->contactId;
+        $user = User::where('email', $email)->first(); 
         $result = null;
         $status = null;
         $message = null;
         $reminderTag = null;
-        $modules = collect([]);
-        
-        
+        $modules = collect([]);    
+
         //Extracting completed modules for the user
-        $products = preg_split('/[\s,]+/', $contact['_Products']);
+        $products = preg_split('/[\s,]+/', $request->products);
         
         $nextModuleOfInterest = null;
         foreach($products as $product){
@@ -74,16 +61,9 @@ class ApiController extends Controller
         $moduleReminderTag = ModuleReminderTags::forModule($nextModuleOfInterest)->first();
         //If module reminder tag is not null, function will return succes and the corresponding tag
         if($moduleReminderTag){
-            $contactId = $contact['Id'];
-            //Checks if getContact returns the corresponding contact Id
-            if($contactId){
-                $infusionsoft->addTag($contactId, $moduleReminderTag->tag_id);
-                $result = ['success' => true, 'message' => $moduleReminderTag->tag_name];
-            }else{
-                $result = ['success' => false, 'message' => 'Contact email not found'];
-            }
-            
-        }else{ //Returns false if no tag is found
+            $result = ['success' => true, 'message' => $moduleReminderTag->tag_name];
+        }else{ 
+        //Returns false if no tag is found
             $result = ['success' => false, 'message' => 'Reminder tag not found'];
         } 
         return Response::json($result);    

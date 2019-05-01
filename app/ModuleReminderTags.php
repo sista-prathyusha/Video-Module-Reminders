@@ -18,9 +18,9 @@ class ModuleReminderTags extends Model
  	 * @return [none]       	 
  	 * */
  	public function createNew($tag){
- 		$this->tag_id = $tag->id;
-        $this->tag_name = $tag->name;
-   	    $this->tag_description = $tag->description;
+ 		$this->tag_id = $tag["tag_id"];
+        $this->tag_name = $tag["tag_name"];
+   	    $this->tag_description = $tag["tag_description"] ?? '';
         $this->save();
  	}
 

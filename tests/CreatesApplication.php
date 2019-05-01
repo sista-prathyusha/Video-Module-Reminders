@@ -3,6 +3,8 @@
 namespace Tests;
 
 use Illuminate\Contracts\Console\Kernel;
+use Mocking;
+use App\Service;
 
 trait CreatesApplication
 {
@@ -18,5 +20,12 @@ trait CreatesApplication
         $app->make(Kernel::class)->bootstrap();
 
         return $app;
+    }
+
+    public function creatMocking()
+    {
+        $this->instance(Service::class, Mockery::mock(Service::class, function ($mock) {
+        $mock->shouldReceive('getContact')->once();
+        }));
     }
 }
